@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 import '../widgets/task_card.dart';
 import '../widgets/add_task_sheet.dart';
+import '../widgets/dashboard_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -38,30 +39,76 @@ class HomeScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16),
 
-        child: provider.tasks.isEmpty
-            ? const Center(
-                child: Text(
-                  "No Tasks Yet",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-                ),
-              )
-            : ListView.builder(
-                itemCount: provider.tasks.length,
+        child: Column(
+          children: [
+            // 🔥 DASHBOARD ROW
+            Consumer<TaskProvider>(
+              builder: (context, provider, _) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: DashboardCard(
+                        title: "Total",
+                        value: provider.totalTasks.toString(),
+                        icon: Icons.list_alt,
+                        color: Colors.indigo,
+                      ),
+                    ),
 
-                itemBuilder: (context, index) {
-                  final task = provider.tasks[index];
+                    const SizedBox(width: 10),
 
-                  return TaskCard(
-                    task: task,
-                    onDelete: () {
-                      provider.deleteTask(index);
-                    },
-                    onToggle: () {
-                      provider.toggleTask(index);
+                    Expanded(
+                      child: DashboardCard(
+                        title: "Completed",
+                        value: provider.completedTasks.toString(),
+                        icon: Icons.check_circle,
+                        color: Colors.green,
+                      ),
+                    ),
+
+                    const SizedBox(width: 10),
+
+                    Expanded(
+                      child: DashboardCard(
+                        title: "Pending",
+                        value: provider.pendingTasks.toString(),
+                        icon: Icons.pending,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            // 🔥 TASK LIST
+            Expanded(
+              child: Consumer<TaskProvider>(
+                builder: (context, provider, _) {
+                  if (provider.tasks.isEmpty) {
+                    return const Center(child: Text("No Tasks Yet"));
+                  }
+
+                  return ListView.builder(
+                    itemCount: provider.tasks.length,
+                    itemBuilder: (context, index) {
+                      final task = provider.tasks[index];
+
+                      return TaskCard(
+                        task: task,
+                        onDelete: () => provider.deleteTask(index),
+                        onToggle: () => provider.toggleTask(index),
+                      );
                     },
                   );
                 },
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
