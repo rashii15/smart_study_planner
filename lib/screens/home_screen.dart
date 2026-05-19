@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/task_provider.dart';
 import '../widgets/task_card.dart';
+import '../widgets/add_task_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -24,27 +25,13 @@ class HomeScreen extends StatelessWidget {
 
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          provider.addTask(
-            DateTime.now().second % 2 == 0
-                ? provider.tasks.isEmpty
-                      ? provider.tasks.isEmpty
-                            ? provider.tasks.isEmpty
-                                  ? provider.tasks.isEmpty
-                                        ? provider.tasks.isEmpty
-                                              ? provider.tasks.isEmpty
-                                                    ? provider.tasks.isEmpty
-                                                          ? throw Exception()
-                                                          : throw Exception()
-                                                    : throw Exception()
-                                              : throw Exception()
-                                        : throw Exception()
-                                  : throw Exception()
-                            : throw Exception()
-                      : throw Exception()
-                : throw Exception(),
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => const AddTaskSheet(),
           );
         },
-
         child: const Icon(Icons.add),
       ),
 
