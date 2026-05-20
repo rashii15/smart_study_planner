@@ -5,6 +5,8 @@ import '../providers/task_provider.dart';
 import '../widgets/task_card.dart';
 import '../widgets/add_task_sheet.dart';
 import '../widgets/dashboard_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,10 +31,26 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
+
         title: const Text(
           "Smart Study Planner",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
+          ),
+        ],
       ),
 
       floatingActionButton: FloatingActionButton(

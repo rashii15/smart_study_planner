@@ -6,6 +6,8 @@ import 'firebase_options.dart';
 
 import 'providers/task_provider.dart';
 import 'screens/login_screen.dart';
+import 'screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +35,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      home: const LoginScreen(),
+      home: FirebaseAuth.instance.currentUser != null
+          ? const HomeScreen()
+          : const LoginScreen(),
     );
   }
 }
