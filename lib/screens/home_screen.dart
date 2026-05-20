@@ -8,6 +8,7 @@ import '../widgets/dashboard_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
 import '../widgets/category_chips.dart';
+import '../widgets/insight_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -127,6 +128,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
+
+            const SizedBox(height: 20),
+
+            const InsightCard(),
 
             const SizedBox(height: 20),
 

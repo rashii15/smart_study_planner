@@ -77,4 +77,40 @@ class TaskProvider extends ChangeNotifier {
 
     return _tasks.where((task) => task.subject == _selectedCategory).toList();
   }
+
+  int get highPriorityTasks =>
+      _tasks.where((task) => task.priority == "High").length;
+
+  int get overdueTasks =>
+      _tasks.where((task) => task.priority == "Overdue").length;
+
+  double get productivityPercent {
+    if (_tasks.isEmpty) return 0;
+
+    return completedTasks / totalTasks;
+  }
+
+  String get studyInsight {
+    if (_tasks.isEmpty) {
+      return "Start by adding your first study task.";
+    }
+
+    if (overdueTasks > 0) {
+      return "You have $overdueTasks overdue task(s). Try to complete them first.";
+    }
+
+    if (highPriorityTasks > 0) {
+      return "You have $highPriorityTasks high priority task(s). Focus on them today.";
+    }
+
+    if (productivityPercent >= 0.8) {
+      return "Great job! You are completing most of your study tasks.";
+    }
+
+    if (pendingTasks > completedTasks) {
+      return "You have more pending tasks. Plan your study time carefully.";
+    }
+
+    return "Your study progress looks balanced. Keep going!";
+  }
 }
