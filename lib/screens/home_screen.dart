@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
 
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -62,13 +62,73 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (_) => const AddTaskSheet(),
           );
         },
-        child: const Icon(Icons.add),
+
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
+
+        icon: const Icon(Icons.add),
+        label: const Text("Add Task"),
       ),
 
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            Consumer<TaskProvider>(
+              builder: (context, provider, _) {
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF5B67F1), Color(0xFF7B83FF)],
+                    ),
+
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+
+                    children: [
+                      const Text(
+                        "Welcome Back 👋",
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      const Text(
+                        "Stay Organized\nStay Productive",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      Consumer<TaskProvider>(
+                        builder: (context, provider, _) {
+                          return Text(
+                            "${provider.pendingTasks} tasks pending today",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
+
             Consumer<TaskProvider>(
               builder: (context, provider, _) {
                 return Row(
@@ -110,7 +170,37 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Consumer<TaskProvider>(
                 builder: (context, provider, _) {
                   if (provider.tasks.isEmpty) {
-                    return const Center(child: Text("No Tasks Yet"));
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+
+                        children: [
+                          Icon(
+                            Icons.task_alt,
+                            size: 90,
+                            color: Colors.grey.shade400,
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          Text(
+                            "No Tasks Yet",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+
+                          const SizedBox(height: 10),
+
+                          Text(
+                            "Tap the button below to add tasks",
+                            style: TextStyle(color: Colors.grey.shade500),
+                          ),
+                        ],
+                      ),
+                    );
                   }
 
                   return ListView.builder(
