@@ -7,6 +7,7 @@ import '../widgets/add_task_sheet.dart';
 import '../widgets/dashboard_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
+import '../widgets/category_chips.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -166,10 +167,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 20),
 
+            CategoryChips(),
+
+            const SizedBox(height: 20),
+
+            const SizedBox(height: 20),
+
             Expanded(
               child: Consumer<TaskProvider>(
                 builder: (context, provider, _) {
-                  if (provider.tasks.isEmpty) {
+                  if (provider.filteredTasks.isEmpty) {
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -204,9 +211,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   return ListView.builder(
-                    itemCount: provider.tasks.length,
+                    itemCount: provider.filteredTasks.length,
                     itemBuilder: (context, index) {
-                      final task = provider.tasks[index];
+                      final task = provider.filteredTasks[index];
 
                       return TaskCard(
                         task: task,

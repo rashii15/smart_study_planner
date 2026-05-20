@@ -50,4 +50,26 @@ class TaskProvider extends ChangeNotifier {
   int get completedTasks => _tasks.where((t) => t.isCompleted).length;
 
   int get pendingTasks => _tasks.where((t) => !t.isCompleted).length;
+
+  String _selectedCategory = "All";
+
+  String get selectedCategory => _selectedCategory;
+
+  void changeCategory(String category) {
+    _selectedCategory = category;
+    notifyListeners();
+  }
+
+  List<String> get categories {
+    final subjects = _tasks.map((task) => task.subject).toSet().toList();
+    return ["All", ...subjects];
+  }
+
+  List<TaskModel> get filteredTasks {
+    if (_selectedCategory == "All") {
+      return _tasks;
+    }
+
+    return _tasks.where((task) => task.subject == _selectedCategory).toList();
+  }
 }
