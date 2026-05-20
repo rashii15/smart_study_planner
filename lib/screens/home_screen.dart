@@ -6,18 +6,29 @@ import '../widgets/task_card.dart';
 import '../widgets/add_task_sheet.dart';
 import '../widgets/dashboard_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final provider = Provider.of<TaskProvider>(context);
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      Provider.of<TaskProvider>(context, listen: false).loadTasks();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-
         title: const Text(
           "Smart Study Planner",
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -38,14 +49,11 @@ class HomeScreen extends StatelessWidget {
 
       body: Padding(
         padding: const EdgeInsets.all(16),
-
         child: Column(
           children: [
-            // 🔥 DASHBOARD ROW
             Consumer<TaskProvider>(
               builder: (context, provider, _) {
                 return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: DashboardCard(
@@ -55,9 +63,7 @@ class HomeScreen extends StatelessWidget {
                         color: Colors.indigo,
                       ),
                     ),
-
                     const SizedBox(width: 10),
-
                     Expanded(
                       child: DashboardCard(
                         title: "Completed",
@@ -66,9 +72,7 @@ class HomeScreen extends StatelessWidget {
                         color: Colors.green,
                       ),
                     ),
-
                     const SizedBox(width: 10),
-
                     Expanded(
                       child: DashboardCard(
                         title: "Pending",
@@ -84,7 +88,6 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // 🔥 TASK LIST
             Expanded(
               child: Consumer<TaskProvider>(
                 builder: (context, provider, _) {

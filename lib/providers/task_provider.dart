@@ -1,24 +1,47 @@
 import 'package:flutter/material.dart';
+
 import '../models/task_model.dart';
+import '../services/task_service.dart';
 
 class TaskProvider extends ChangeNotifier {
+  final TaskService _taskService = TaskService();
+
   final List<TaskModel> _tasks = [];
 
   List<TaskModel> get tasks => _tasks;
 
-  void addTask(TaskModel task) {
-    _tasks.add(task);
+  Future<void> loadTasks() async {
+    _tasks.clear();
+
+    final loadedTasks = await _taskService.fetchTasks();
+
+    _tasks.addAll(loadedTasks);
+
     notifyListeners();
   }
 
-  void toggleTask(int index) {
+  Future<void> addTask(TaskModel task) async {
+    await _taskService.addTask(task);
+    await loadTasks();
+  }
+
+  Future<void> toggleTask(int index) async {
     _tasks[index].isCompleted = !_tasks[index].isCompleted;
 
+    await _taskService.updateTask(_tasks[index]);
+
     notifyListeners();
   }
 
-  void deleteTask(int index) {
+  Future<void> deleteTask(int index) async {
+    final taskId = _tasks[index].id;
+
+    if (taskId == null) return;
+
+    await _taskService.deleteTask(taskId);
+
     _tasks.removeAt(index);
+
     notifyListeners();
   }
 
