@@ -45,6 +45,11 @@ class TaskProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateTask(TaskModel updatedTask) async {
+    await _taskService.updateTask((updatedTask));
+    await loadTasks();
+  }
+
   int get totalTasks => _tasks.length;
 
   int get completedTasks => _tasks.where((t) => t.isCompleted).length;

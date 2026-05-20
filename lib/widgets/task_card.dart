@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/task_model.dart';
+import 'edit_task_sheet.dart';
 
 class TaskCard extends StatelessWidget {
   final TaskModel task;
@@ -116,10 +117,25 @@ class TaskCard extends StatelessWidget {
             ),
           ),
 
-          // Delete button
-          IconButton(
-            onPressed: onDelete,
-            icon: const Icon(Icons.delete, color: Colors.red),
+          Column(
+            children: [
+              IconButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => EditTaskSheet(task: task),
+                  );
+                },
+                icon: const Icon(Icons.edit, color: Colors.indigo),
+              ),
+
+              IconButton(
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete, color: Colors.red),
+              ),
+            ],
           ),
         ],
       ),
