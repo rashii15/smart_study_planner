@@ -1,28 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../models/task_model.dart';
 import '../providers/task_provider.dart';
 import '../widgets/task_card.dart';
 
-class CalendarScreen extends StatelessWidget {
+class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
 
-  bool isToday(DateTime date) {
-    final now = DateTime.now();
+  @override
+  State<CalendarScreen> createState() => _CalendarScreenState();
+}
 
-    return date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day;
+class _CalendarScreenState extends State<CalendarScreen> {
+  DateTime focusedMonth = DateTime.now();
+  DateTime selectedDate = DateTime.now();
+
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 
-  bool isUpcoming(DateTime date) {
-    final now = DateTime.now();
-    return date.isAfter(now);
+  List<DateTime> getDaysInMonth(DateTime month) {
+    final firstDay = DateTime(month.year, month.month, 1);
+    final lastDay = DateTime(month.year, month.month + 1, 0);
+
+    final days = <DateTime>[];
+
+    // Add empty previous days to align calendar grid
+    final startWeekday = firstDay.weekday; // Monday = 1
+    for (int i = 1; i < startWeekday; i++) {
+      days.add(DateTime(0));
+    }
+
+    for (int i = 1; i <= lastDay.day; i++) {
+      days.add(DateTime(month.year, month.month, i));
+    }
+
+    return days;
   }
 
-  bool isOverdue(DateTime date) {
-    final now = DateTime.now();
-    return date.isBefore(DateTime(now.year, now.month, now.day));
+  List<TaskModel> tasksForDate(List<TaskModel> tasks, DateTime date) {
+    return tasks.where((task) {
+      return isSameDay(task.deadline, date);
+    }).toList();
+  }
+
+  void previousMonth() {
+    setState(() {
+      focusedMonth = DateTime(focusedMonth.year, focusedMonth.month - 1);
+    });
+  }
+
+  void nextMonth() {
+    setState(() {
+      focusedMonth = DateTime(focusedMonth.year, focusedMonth.month + 1);
+    });
+  }
+
+  String monthName(int month) {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    return months[month - 1];
   }
 
   @override
@@ -31,24 +82,13 @@ class CalendarScreen extends StatelessWidget {
       body: SafeArea(
         child: Consumer<TaskProvider>(
           builder: (context, provider, _) {
-            final todayTasks = provider.tasks
-                .where((task) => isToday(task.deadline))
-                .toList();
-
-            final overdueTasks = provider.tasks
-                .where((task) => isOverdue(task.deadline) && !task.isCompleted)
-                .toList();
-
-            final upcomingTasks = provider.tasks
-                .where(
-                  (task) =>
-                      isUpcoming(task.deadline) && !isToday(task.deadline),
-                )
-                .toList();
+            final days = getDaysInMonth(focusedMonth);
+            final selectedTasks = tasksForDate(provider.tasks, selectedDate);
 
             return Padding(
               padding: const EdgeInsets.all(16),
-              child: ListView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
                     "Study Calendar",
@@ -58,32 +98,203 @@ class CalendarScreen extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   Text(
-                    "View your study deadlines by date.",
+                    "Track your deadlines by date",
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
 
-                  const SizedBox(height: 25),
-
-                  _Section(
-                    title: "Today",
-                    tasks: todayTasks,
-                    emptyMessage: "No tasks due today",
-                  ),
-
                   const SizedBox(height: 20),
 
-                  _Section(
-                    title: "Overdue",
-                    tasks: overdueTasks,
-                    emptyMessage: "No overdue tasks",
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 12,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                              onPressed: previousMonth,
+                              icon: const Icon(Icons.chevron_left),
+                            ),
+
+                            Text(
+                              "${monthName(focusedMonth.month)} ${focusedMonth.year}",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            IconButton(
+                              onPressed: nextMonth,
+                              icon: const Icon(Icons.chevron_right),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: const [
+                            _WeekDay("Mon"),
+                            _WeekDay("Tue"),
+                            _WeekDay("Wed"),
+                            _WeekDay("Thu"),
+                            _WeekDay("Fri"),
+                            _WeekDay("Sat"),
+                            _WeekDay("Sun"),
+                          ],
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: days.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 7,
+                                mainAxisSpacing: 8,
+                                crossAxisSpacing: 8,
+                              ),
+                          itemBuilder: (context, index) {
+                            final day = days[index];
+
+                            if (day.year == 0) {
+                              return const SizedBox();
+                            }
+
+                            final isSelected = isSameDay(day, selectedDate);
+                            final isToday = isSameDay(day, DateTime.now());
+                            final dayTasks = tasksForDate(provider.tasks, day);
+
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedDate = day;
+                                });
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colors.indigo
+                                      : isToday
+                                      ? Colors.indigo.withOpacity(0.10)
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isToday
+                                        ? Colors.indigo
+                                        : Colors.transparent,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      day.day.toString(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 4),
+
+                                    if (dayTasks.isNotEmpty)
+                                      Container(
+                                        height: 6,
+                                        width: 6,
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : Colors.orange,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 22),
 
-                  _Section(
-                    title: "Upcoming",
-                    tasks: upcomingTasks,
-                    emptyMessage: "No upcoming tasks",
+                  Text(
+                    "Tasks on ${selectedDate.day} ${monthName(selectedDate.month)}",
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Expanded(
+                    child: selectedTasks.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.event_available,
+                                  size: 80,
+                                  color: Colors.grey.shade400,
+                                ),
+
+                                const SizedBox(height: 16),
+
+                                Text(
+                                  "No tasks for this day",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                Text(
+                                  "Select another date or add a task",
+                                  style: TextStyle(color: Colors.grey.shade500),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: selectedTasks.length,
+                            itemBuilder: (context, index) {
+                              final task = selectedTasks[index];
+                              final realIndex = provider.tasks.indexOf(task);
+
+                              return TaskCard(
+                                task: task,
+                                onDelete: () => provider.deleteTask(realIndex),
+                                onToggle: () => provider.toggleTask(realIndex),
+                              );
+                            },
+                          ),
                   ),
                 ],
               ),
@@ -95,55 +306,20 @@ class CalendarScreen extends StatelessWidget {
   }
 }
 
-class _Section extends StatelessWidget {
-  final String title;
-  final List tasks;
-  final String emptyMessage;
+class _WeekDay extends StatelessWidget {
+  final String day;
 
-  const _Section({
-    required this.title,
-    required this.tasks,
-    required this.emptyMessage,
-  });
+  const _WeekDay(this.day);
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<TaskProvider>(context, listen: false);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
-        ),
-
-        const SizedBox(height: 12),
-
-        if (tasks.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: Text(
-              emptyMessage,
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-          )
-        else
-          ...tasks.map((task) {
-            final index = provider.tasks.indexOf(task);
-
-            return TaskCard(
-              task: task,
-              onDelete: () => provider.deleteTask(index),
-              onToggle: () => provider.toggleTask(index),
-            );
-          }),
-      ],
+    return Text(
+      day,
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey.shade600,
+      ),
     );
   }
 }
