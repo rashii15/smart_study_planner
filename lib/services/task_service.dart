@@ -26,7 +26,9 @@ class TaskService {
   }
 
   Future<void> updateTask(TaskModel task) async {
-    await _taskCollection.doc(task.id).update(task.toMap());
+    if (task.id != null) {
+      await _taskCollection.doc(task.id).update(task.toMap());
+    }
   }
 
   Future<void> deleteTask(String id) async {

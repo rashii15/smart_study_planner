@@ -176,8 +176,6 @@ class _TasksScreenState extends State<TasksScreen> {
 
             const SizedBox(height: 20),
 
-            const SizedBox(height: 20),
-
             Expanded(
               child: Consumer<TaskProvider>(
                 builder: (context, provider, _) {
@@ -222,8 +220,8 @@ class _TasksScreenState extends State<TasksScreen> {
 
                       return TaskCard(
                         task: task,
-                        onDelete: () => provider.deleteTask(index),
-                        onToggle: () => provider.toggleTask(index),
+                        onDelete: () => provider.deleteTask(task),
+                        onToggle: () => provider.toggleTask(task),
                       );
                     },
                   );

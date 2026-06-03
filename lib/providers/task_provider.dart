@@ -25,28 +25,29 @@ class TaskProvider extends ChangeNotifier {
     await loadTasks();
   }
 
-  Future<void> toggleTask(int index) async {
-    _tasks[index].isCompleted = !_tasks[index].isCompleted;
+  Future<void> toggleTask(TaskModel task) async {
+    task.isCompleted = !task.isCompleted;
 
-    await _taskService.updateTask(_tasks[index]);
+    await _taskService.updateTask(task);
 
     notifyListeners();
   }
 
-  Future<void> deleteTask(int index) async {
-    final taskId = _tasks[index].id;
+  Future<void> deleteTask(TaskModel task) async {
+    final taskId = task.id;
 
     if (taskId == null) return;
 
     await _taskService.deleteTask(taskId);
 
-    _tasks.removeAt(index);
+    _tasks.removeWhere((t) => t.id == taskId);
 
     notifyListeners();
   }
 
   Future<void> updateTask(TaskModel updatedTask) async {
     await _taskService.updateTask((updatedTask));
+
     await loadTasks();
   }
 

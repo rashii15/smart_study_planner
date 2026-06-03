@@ -31,9 +31,12 @@ class _AddTaskSheetState extends State<AddTaskSheet> {
   }
 
   void saveTask() {
-    if (titleController.text.isEmpty ||
-        subjectController.text.isEmpty ||
+    if (titleController.text.trim().isEmpty ||
+        subjectController.text.trim().isEmpty ||
         selectedDate == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
       return;
     }
 

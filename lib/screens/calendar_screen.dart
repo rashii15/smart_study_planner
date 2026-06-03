@@ -290,8 +290,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                               return TaskCard(
                                 task: task,
-                                onDelete: () => provider.deleteTask(realIndex),
-                                onToggle: () => provider.toggleTask(realIndex),
+                                onDelete: () => provider.deleteTask(task),
+                                onToggle: () => provider.toggleTask(task),
                               );
                             },
                           ),
