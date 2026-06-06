@@ -1,19 +1,34 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'providers/task_provider.dart';
-import 'screens/home_screen.dart';
+import 'firebase_options.dart';
 
-void main() {
+import 'providers/task_provider.dart';
+import 'screens/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/main_navigation_screen.dart';
+import 'providers/focus_provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
   runApp(
-    ChangeNotifierProvider(create: (_) => TaskProvider(), child: const MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TaskProvider()),
+        ChangeNotifierProvider(create: (_) => FocusProvider()),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,19 +42,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
 
-      home: const HomeScreen(),
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Smart Study Planner")),
-      body: const Center(child: Text("Home Screen")),
+      home: FirebaseAuth.instance.currentUser != null
+          ? const MainNavigationScreen()
+          : const LoginScreen(),
     );
   }
 }
